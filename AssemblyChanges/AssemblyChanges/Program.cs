@@ -1,25 +1,24 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Reflection;
 using Mono.Cecil;
 using Mono.Cecil.Cil;
 using Mono.Cecil.Rocks;
 
 // TODO:
-//  1. Сделать поддержку не только DLL, еще и EXE и сделать проверку на валидность.
-//  2. Подумать над тем как модуль тянуть. Как asm.MainModule или как сейчас.
-//  3. Создавать новый module или старый как-то правильно сохранить надо?
-//  4. C# docs?
-//  5. Понять, можно ли обойти в конце проверку на строку.
-//  6. Добавить тесты.
-//  7. Еще почитать о "<Module>"
-//  8. Refactoring
+//  Добавить тесты
+//  Добавить комментарии
 namespace AssemblyChanges
 {
     class Program
     {
         private static readonly MethodInfo DecimalSubtractMethodInfo = typeof(decimal).GetMethod(
             "Subtract", new[] {typeof(decimal), typeof(decimal)}
+        );
+
+        private static readonly MethodInfo DecimalAddMethodInfo = typeof(decimal).GetMethod(
+            "op_Addition", new[] {typeof(decimal), typeof(decimal)}
         );
 
         private static readonly Instruction SubtractInstruction = Instruction.Create(OpCodes.Sub);
@@ -29,49 +28,98 @@ namespace AssemblyChanges
             if (args.Length != 2)
             {
                 throw new ArgumentException(
-                    "You must pass the path to the .NET assembly and the path to the resulting file."
+                    "You must pass the path to the .NET assembly and the path to the resulting file"
                 );
             }
 
-            RebuildAssembly(args[0], args[1]);
+            var assemblyFile = args[0];
+            var resultingFile = args[1];
+
+            Validation(assemblyFile, ref resultingFile);
+            Console.WriteLine(resultingFile);
+            CopyAssembly(assemblyFile, resultingFile);
+
+            var copyAssemblyFile = Path.Combine(resultingFile, Path.GetFileName(assemblyFile));
+            RebuildAssembly(copyAssemblyFile);
         }
 
-        // TODO: результирующий файл не как DLL
-        public static void RebuildAssembly(string assemblyFile, string resultingFile)
+        private static void Validation(string assemblyFile, ref string destinationPath)
         {
-            // TODO: AssemblyDefinition or ModuleDefinition
+            if (!File.Exists(assemblyFile))
+            {
+                throw new FileNotFoundException("File are not found");
+            }
+
+            if (Path.GetExtension(assemblyFile).ToLower() != ".dll" &&
+                Path.GetExtension(assemblyFile).ToLower() != ".exe")
+            {
+                throw new ArgumentException("Assembly file is not C# build");
+            }
+
+            if (!File.GetAttributes(destinationPath).HasFlag(FileAttributes.Directory))
+            {
+                destinationPath = Path.GetDirectoryName(destinationPath);
+            }
+
+            destinationPath = Path.Combine(destinationPath!, "build");
+
+            if (!Directory.Exists(destinationPath))
+            {
+                Directory.CreateDirectory(destinationPath);
+            }
+        }
+
+        // TODO: разобраться с зависимыми файлами
+        private static void CopyAssembly(string assemblyFile, string destinationDirectory)
+        {
+            var assemblyDirectory = Path.GetDirectoryName(assemblyFile) ?? string.Empty;
+
+            foreach (var dirPath in Directory.GetDirectories(assemblyDirectory, "*", SearchOption.AllDirectories))
+            {
+                Directory.CreateDirectory(dirPath.Replace(assemblyDirectory, destinationDirectory));
+            }
+
+            foreach (var newPath in Directory.GetFiles(assemblyDirectory, "*.*", SearchOption.AllDirectories))
+            {
+                File.Copy(newPath, newPath.Replace(assemblyDirectory, destinationDirectory), true);
+            }
+        }
+
+        private static void RebuildAssembly(string assemblyFile)
+        {
             using var module = ModuleDefinition.ReadModule(
-                assemblyFile
-                // , new ReaderParameters {ReadWrite = true}
+                assemblyFile,
+                new ReaderParameters {ReadWrite = true}
             );
-
             var decimalSubtractMethodRef = module.ImportReference(DecimalSubtractMethodInfo);
+            var decimalAddMethodRef = module.ImportReference(DecimalAddMethodInfo);
 
-            /// <mark>
-            /// ModuleDefinition.Types now only returns top level (not nested) types.
-            /// If you want to iterate over all the types defined in an assembly,
-            /// you can use the method ModuleDefinition.GetTypes().
-            /// </mark>
+            /*
+             * ModuleDefinition.Types now only returns top level (not nested) types.
+             * If you want to iterate over all the types defined in an assembly,
+             * you can use the method ModuleDefinition.GetTypes().
+             */
             foreach (var type in module.GetTypes())
             {
-                if (type.Name == "<Module>")
-                {
-                    continue;
-                }
+                if (type.Name == "<Module>") continue;
 
+                /* 
+                 * TypeDefinition.Constructors is merged inside TypeDefinition.Methods.
+                 * It was a Cecil thing, and it was breaking the order in which methods are defined in the type.
+                 */
                 foreach (var method in type.GetMethods())
                 {
-                    ReplaceInstructions(method, decimalSubtractMethodRef);
+                    ReplaceInstructions(method, decimalSubtractMethodRef, decimalAddMethodRef);
                 }
             }
 
-            // TODO: fix видимо необходимо подвязать зависимости
-            module.Write(resultingFile);
+            module.Write();
         }
 
         private static void ReplaceInstructions(
             MethodDefinition methodDefinition,
-            MethodReference decimalSubtractMethodRef
+            MethodReference decimalSubtractMethodRef,
+            MemberReference decimalAddMethodRef
         )
         {
             var processor = methodDefinition.Body.GetILProcessor();
@@ -86,11 +134,17 @@ namespace AssemblyChanges
                     simpleInstructions.Add(instruction);
                 }
 
-                if (instruction.OpCode == OpCodes.Call &&
-                    instruction.Operand.ToString() ==
-                    "System.Decimal System.Decimal::op_Addition(System.Decimal,System.Decimal)")
+                if (instruction.OpCode == OpCodes.Call)
                 {
-                    decimalInstructions.Add(instruction);
+                    // Check: instruction == System.Decimal::op_Addition(System.Decimal,System.Decimal)
+                    if (instruction.Operand is MethodReference methodRef &&
+                        string.Equals(
+                            methodRef.FullName,
+                            decimalAddMethodRef.FullName,
+                            StringComparison.InvariantCultureIgnoreCase))
+                    {
+                        decimalInstructions.Add(instruction);
+                    }
                 }
             }
 
