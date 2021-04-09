@@ -3,7 +3,7 @@
 
 
 *.idea
-*build
+*changedBuild
 
 # User-specific files
 *.suo

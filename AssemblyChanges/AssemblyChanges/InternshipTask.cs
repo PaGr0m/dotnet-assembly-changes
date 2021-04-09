@@ -39,11 +39,18 @@ namespace AssemblyChanges
 
         private static void RunProgram(string assemblyFile, string resultingFile)
         {
-            Utils.Validation(assemblyFile, ref resultingFile);
-            Utils.CopyAssembly(assemblyFile, resultingFile);
+            try
+            {
+                Utils.Validation(assemblyFile, ref resultingFile);
+                Utils.CopyAssembly(assemblyFile, resultingFile);
 
-            var copyAssemblyFile = Path.Combine(resultingFile, Path.GetFileName(assemblyFile));
-            AssemblyChanger.ChangeInstructionsAddToSubtract(copyAssemblyFile);
+                var copyAssemblyFile = Path.Combine(resultingFile, Path.GetFileName(assemblyFile));
+                AssemblyChanger.ChangeInstructionsAddToSubtract(copyAssemblyFile);
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.Message);
+            }
         }
     }
 }

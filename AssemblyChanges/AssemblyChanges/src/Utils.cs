@@ -9,13 +9,13 @@ namespace AssemblyChanges
         {
             if (!File.Exists(assemblyFile))
             {
-                throw new FileNotFoundException("File are not found");
+                throw new FileNotFoundException("File are not found!");
             }
 
             if (Path.GetExtension(assemblyFile).ToLower() != ".dll" &&
                 Path.GetExtension(assemblyFile).ToLower() != ".exe")
             {
-                throw new ArgumentException("Assembly file is not C# build");
+                throw new ArgumentException("Assembly file is not C# build!");
             }
 
             if (!File.GetAttributes(destinationPath).HasFlag(FileAttributes.Directory))
