@@ -6,7 +6,6 @@ saved along the path.
 
 ## Usage
 
----
 Run from project root directory
 
 ```shell
