@@ -6,7 +6,9 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <PackageReference Include="Mono.Cecil" Version="0.11.3" />
+<!--        <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.9.4" />-->
+        <PackageReference Include="CommandLineParser" Version="2.9.0-preview1" />
+        <PackageReference Include="Mono.Cecil" Version="0.11.3" />
     </ItemGroup>
-
+    
 </Project>
