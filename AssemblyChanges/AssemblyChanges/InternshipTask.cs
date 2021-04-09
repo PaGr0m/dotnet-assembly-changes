@@ -27,10 +27,10 @@ namespace AssemblyChanges
 
         public static void Main(string[] args)
         {
-            CommandLine.Parser.Default.ParseArguments<Options>(args)
+            Parser.Default.ParseArguments<Options>(args)
                 .WithNotParsed(
-                    err => Console.WriteLine(
-                        "You must pass the path to the .NET assembly and the path to the resulting file"
+                    _ => Console.WriteLine(
+                        "You must pass the path to the .NET assembly and the path to the resulting file!"
                     )
                 ).WithParsed(
                     options => RunProgram(options.AssemblyFile, options.ResultingFile)
