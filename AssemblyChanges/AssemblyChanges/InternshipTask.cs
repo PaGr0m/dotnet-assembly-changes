@@ -41,8 +41,8 @@ namespace AssemblyChanges
         {
             try
             {
-                Utils.Validation(assemblyFile, ref resultingFile);
-                Utils.CopyAssembly(assemblyFile, resultingFile);
+                AssemblyUtils.Validation(assemblyFile, ref resultingFile);
+                AssemblyUtils.CopyAssembly(assemblyFile, resultingFile);
 
                 var copyAssemblyFile = Path.Combine(resultingFile, Path.GetFileName(assemblyFile));
                 AssemblyChanger.ChangeInstructionsAddToSubtract(copyAssemblyFile);

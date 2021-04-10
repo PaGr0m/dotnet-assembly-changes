@@ -3,7 +3,7 @@ using System.IO;
 
 namespace AssemblyChanges
 {
-    public static class Utils
+    public static class AssemblyUtils
     {
         public static void Validation(string assemblyFile, ref string destinationPath)
         {

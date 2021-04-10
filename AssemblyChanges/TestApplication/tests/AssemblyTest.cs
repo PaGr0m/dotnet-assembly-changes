@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
@@ -71,6 +72,30 @@ namespace TestApplication.tests
                     }
                 }
             }
+        }
+        
+        [Test]
+        public void TestWithIncorrectFilePath()
+        {
+            var simpleString = "incorrectDllPath";
+            Assert.Throws<FileNotFoundException>(
+                () => AssemblyUtils.Validation("incorrectDllPath", ref simpleString)
+            );
+        }
+
+        [Test]
+        public void TestWithIncorrectFileExtension()
+        {
+            var dllPath = Assembly.GetExecutingAssembly().Location;
+            var buildDir = Path.GetDirectoryName(dllPath);
+
+            Assert.NotNull(buildDir);
+            var pdbPath = Path.Combine(buildDir, Path.GetFileNameWithoutExtension(dllPath) + ".pdb");
+
+            var simpleString = "incorrectDllPath";
+            Assert.Throws<ArgumentException>(
+                () => AssemblyUtils.Validation(pdbPath, ref simpleString)
+            );
         }
     }
 }
