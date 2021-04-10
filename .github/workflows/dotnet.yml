@@ -18,8 +18,10 @@ jobs:
       with:
         dotnet-version: 5.0.x
     - name: Restore dependencies
+      working-directory: AssemblyChanges
       run: dotnet restore
     - name: Build
+      working-directory: AssemblyChanges
       run: dotnet build --no-restore
     - name: Test
       working-directory: AssemblyChanges
