@@ -4,15 +4,24 @@ This program converts the original .NET assembly, replacing all addition operati
 operations (`OpCodes.Sub`), using the [Mono.Cecil](https://github.com/jbevain/cecil) library. The resulting assembly is
 saved along the path.
 
+## Solutions
+
+- [AssemblyChanges](https://github.com/PaGr0m/dotnet-assembly-changes/tree/main/AssemblyChanges/AssemblyChanges) - The
+  main logic for working with CIL (Common Intermediate Language)
+- [ConsoleApplication](https://github.com/PaGr0m/dotnet-assembly-changes/tree/main/AssemblyChanges/ConsoleApplication) -
+  Simple console application with outputting the result of methods
+- [TestApplication](https://github.com/PaGr0m/dotnet-assembly-changes/tree/main/AssemblyChanges/TestApplication) -
+  Application for testing basic logic using NUnit
+
 ## Usage
 
-Run from project root directory
+Run from project root directory:
 
 ```shell
 $ dotnet run --project ./AssemblyChanges/AssemblyChanges/AssemblyChanges.csproj -- pathToAssembly pathToNewDirectory
 ```
 
-or from build directory with assembly
+Run from build directory with assembly:
 
 ```shell
 $ dotnet AssemblyChanges.dll -- pathToAssembly pathToNewDirectory
