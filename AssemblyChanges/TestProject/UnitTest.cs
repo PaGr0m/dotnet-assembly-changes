@@ -5,9 +5,9 @@ using System.Reflection;
 using AssemblyChanges;
 using NUnit.Framework;
 
-namespace TestApplication.tests
+namespace TestProject
 {
-    public class AssemblyTest
+    public class Tests
     {
         private readonly KeyValuePair<int, int> _ints = new(8, 3);
         private readonly KeyValuePair<double, double> _doubles = new(5.5, 7.3);
@@ -73,7 +73,7 @@ namespace TestApplication.tests
                 }
             }
         }
-        
+
         [Test]
         public void TestWithIncorrectFilePath()
         {

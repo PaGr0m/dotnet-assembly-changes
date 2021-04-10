@@ -1,6 +1,6 @@
-﻿namespace TestApplication
+namespace TestProject.examples
 {
-    class Program
+    public class Example
     {
         public static int TestInt(int a, int b)
         {
