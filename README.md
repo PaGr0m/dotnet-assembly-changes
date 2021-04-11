@@ -2,7 +2,7 @@
 
 This program converts the original .NET assembly, replacing all addition operations (`OpCodes.Add`) with subtraction
 operations (`OpCodes.Sub`), using the [Mono.Cecil](https://github.com/jbevain/cecil) library. The resulting assembly is
-saved along the path.
+saved to the new path.
 
 ## Solutions
 
@@ -27,5 +27,4 @@ Run from build directory with assembly:
 $ dotnet AssemblyChanges.dll -- pathToAssembly pathToNewDirectory
 ```
 
-NOTE: when passing a file as the second argument, and not a directory, then the directory in which the file is located
-will be selected.
+NOTE: when passing a file as the second argument (not a directory), then the resulting directory will be selected.
