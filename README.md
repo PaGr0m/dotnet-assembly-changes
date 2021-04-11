@@ -27,4 +27,4 @@ Run from build directory with assembly:
 $ dotnet AssemblyChanges.dll -- pathToAssembly pathToNewDirectory
 ```
 
-NOTE: when passing a file as the second argument (not a directory), then the resulting directory will be selected.
+**NOTE:** when passing a file as the second argument (not a directory), then the resulting directory will be selected.
